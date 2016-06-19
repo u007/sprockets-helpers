@@ -143,10 +143,19 @@ module Sprockets
       end
 
       path = find_asset_path(uri, source, options)
+      # logger.info "asset-path: #{source}, #{options.inspect}, result: #{path.to_s.inspect}"
       if options[:expand] && path.respond_to?(:to_a)
         path.to_a
       else
-        path.to_s
+        if options[:type] && options[:type] == :image
+          res = path.to_s[0,1]+'images/'+path.to_s[1..-1]
+          logger.info "path-ori: #{path.to_s}, result: #{res.inspect}"
+          return res
+        elsif options[:type] && options[:type] == :font
+          return path.to_s[0,1]+'fonts/'+path.to_s[1..-1]
+        else
+          return path.to_s
+        end
       end
     end
     alias_method :path_to_asset, :asset_path
@@ -250,7 +259,9 @@ module Sprockets
     #   image_path 'http://www.example.com/img/edit.png' # => 'http://www.example.com/img/edit.png'
     #
     def image_path(source, options = {})
-      asset_path source, Helpers.default_path_options[:image_path].merge(options)
+      res = asset_path source, Helpers.default_path_options[:image_path].merge(options)
+      logger.info "imgpath res: #{res.inspect}"
+      res
     end
     alias_method :path_to_image, :image_path
 
